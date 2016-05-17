@@ -1,0 +1,43 @@
+{
+  "name": "@nearform/patterns-deck",
+  "version": "2.0.2",
+  "skin": "@nearform/skin",
+  "scripts": {
+    "start": "present"
+  },
+  "files": [
+    "deck.md",
+    "images",
+    "source"
+  ],
+  "author": "David Mark Clements",
+  "bin": {
+    "present-patterns-deck": "./node_modules/.bin/present"
+  },
+  "dependencies": {
+    "@deck/present": "^1.0.0",
+    "@nearform/skin": "^1.0.2"
+  },
+  "_shasum": "a3e3c9461d02deb3bcc8452e428f7d087489b5d9",
+  "_from": "@nearform/core-deck@*",
+  "_npmVersion": "2.11.1",
+  "_nodeVersion": "0.10.38",
+  "_npmUser": {},
+  "dist": {
+    "shasum": "a3e3c9461d02deb3bcc8452e428f7d087489b5d9",
+    "tarball": "http://nftra.in/@nearform%2fcore-deck/-/core-deck-2.0.0.tgz"
+  },
+  "_resolved": "http://nftra.in/@nearform%2fcore-deck/-/core-deck-2.0.0.tgz",
+  "description": "<!-- master: title-page -->",
+  "main": "index.js",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nearform/training-patterns-deck.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nearform/training-patterns-deck/issues"
+  },
+  "homepage": "https://github.com/nearform/training-patterns-deck#readme"
+}
