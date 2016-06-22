@@ -1,7 +1,7 @@
 {
   "name": "@nearform/patterns-deck",
   "version": "2.0.2",
-  "skin": "@nearform/skin",
+  "skin": "@deck/skin-light",
   "scripts": {
     "start": "present"
   },
@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@deck/present": "^1.0.0",
-    "@nearform/skin": "^1.0.2"
+    "@deck/skin-light": "^1.0.2"
   },
   "_shasum": "a3e3c9461d02deb3bcc8452e428f7d087489b5d9",
   "_from": "@nearform/core-deck@*",
