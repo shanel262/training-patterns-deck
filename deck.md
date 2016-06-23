@@ -9,7 +9,7 @@ master: title-page
 ---
 
 <!--
-master: standard-slides
+master: title-page
 -->
 
 # Patterns
@@ -24,7 +24,11 @@ master: standard-slides
 -->
 
 # The Module Pattern
-![img](./images/modPattern.png)
+```javascript
+const fs = require('fs')
+const ecoSystemMod = require('eco-system-mod')
+const appLib = require('./lib')
+```
 - Node's module system is based on CommonJS
 - Modules are _synchronously_ required at initialisation time
 - A module is a file that's run in a function scope context (not globally)
@@ -37,7 +41,13 @@ master: standard-slides
 -->
 
 # The Module Pattern
-![img](./images/modPattern2.png)
+```javascript
+exports.init = () => 'module'
+---------------------------------------------
+module.exports = {init: () => 'module'}
+---------------------------------------------
+module.exports = () => {my: () => 'module'}
+```
 - Most modules shouldn't be singletons
     - When a module needs to be initialized export a function (the 3rd approach)
 - Some modules could be singletons
@@ -51,7 +61,9 @@ master: browserify-slides
 -->
 
 # Browserify
-![install](./images/npmibrowserify.png)
+```bash
+npm install -g browserify
+```
 - The export-require pattern can be transported to the browser via the browserify tool
 - It works by bundling all the modules into a single file
     - This means require is still synchronous
@@ -127,12 +139,34 @@ getInode(process.cwd(), (err, inode, path) => {
 ---
 
 <!--
-master: image
+master: code
 -->
 
 # Concurrency
 ## The so-called pyramid of doom
-![Pyramid of doom](./images/pyramid.png)
+```javascript
+function assimilateGiraffe(cb) {
+    db.lookup(query, function (err, result) {
+        if (err) {
+            cb(err)
+        } else {
+            getResourse(result, function (err, resource) {
+                if (err) {
+                    cb(err)
+                } else {
+                    resource.assimilate(function (err, giraffe) {
+                        if (err) {
+                            cb(err)
+                        } else {
+                            cb(null, giraffe)
+                        }
+                    })
+                }
+            })
+        }
+    })
+}
+```
 
 ---
 
@@ -149,22 +183,58 @@ master: standard-slides
 ---
 
 <!--
-master: image
+master: code
 -->
 
 # Concurrency
 ## avoid else branches by returning early
-![](./images/returnEarly.png)
+```javascript
+function assimilateGiraffe(cb) {
+    db.lookup(query, function (err, result) {
+
+        if (err) { return cb(err) }
+
+        getResource(result, function (err, response) {
+
+            if (err) { return cb(err) }
+
+            resource.assimilate(function (err, giraffe) {
+
+                if (err) { return cb(err) }
+                cb(null, giraffe)
+            })
+        })
+    })
+}
+```
 
 ---
 
 <!--
-master: image
+master: code
 -->
 
 # Concurrency
 ## break out inlined functions
-![](./images/inlinedFunc.png)
+```javascript
+function assimilateGiraffe(cb) {
+    db.lookup(query, rxResult)
+
+    function rxResult(err, result) {
+        if (err) { return cb(err) }
+        getResource(result, rxResource)
+    }
+
+    function rxResource(err, resource) {
+        if (err) { return cb(err) }
+        resource.assimilate(rxGiraffe)
+    }
+
+    function rxGiraffe(err, giraffe) {
+        if (err) { return cb(err) }
+        cb(null, giraffe)
+    }
+```
 
 ---
 
@@ -183,12 +253,22 @@ master: standard-slides
 ---
 
 <!--
-master: image
+master: code
 -->
 
 # Concurrency
 ## switching to promises is an option
-![](./images/promise.png)
+```javascript
+function assimilateGiraffe() {
+    return db.lookup(query, rxResult)
+      .then(getResource)
+      .then((resource) => resource.assimilate())
+}
+
+assimilateGiraffe()
+    .then(console.log)
+    .catch(console.error)
+```
 
 ---
 
@@ -219,12 +299,22 @@ master: standard-slides
 ---
 
 <!--
-master: image
+master: code
 -->
 
 # Concurrency
 ## the async module can reduce nesting too
-![](./images/asyncMod.png)
+```javascript
+const async = require('async')
+
+function assimilateGiraffe(cb) {
+  async.waterfall([
+    (next) => db.lookup(query, next),
+    (result, next) => getResource(result, next),
+    (resource, next) => resource.assimilate(next),
+  ], cb)
+}
+```
 
 ---
 
@@ -364,11 +454,44 @@ master: standard-slides
 ---
 
 <!--
-master: image
+master: code
 -->
 
 # Code Reuse
-![](./images/codeReuse.png)
+```javascript
+function createWorld(name = 'Cronenberg World') {
+    const species = new Set()
+
+    return { name, createBeing, createWalker, createBiped, getExistingSpecies }
+
+    function getExistingSpecies () { return Array.from(species) }
+
+    function createBeing({name, type = 'being'} = {}) {
+        species.add(type)
+        return { name, reproduce }
+        function reproduce(name) { return Object.assign({}, this, {name}) }
+    }
+    function createWalker({name, type = 'walker', legs = 4, speed = 10} = {}) {
+        const stepsPerSec = 1000 / speed
+        let steps = 0
+        let intv
+        return Object.assign({}, createBeing({name, type}), {
+            walk: () => {
+                intv = intv || setInterval(() => steps += legs, stepsPerSec)
+                return type + ' is walking'
+            },
+            stop: () => {
+                clearInterval(intv)
+                intv = null
+                return type + ' walked ' + steps + ' steps'
+            }
+        })
+    }
+    function createBiped({name, type = 'biped', step = 2, speed = 5} = {}) {
+        return createWalker({name, type, step, speed})
+    }
+}
+```
 
 ---
 
@@ -389,11 +512,49 @@ master: standard-slides
 ---
 
 <!--
-master: image
+master: code
 -->
 
 # Code Reuse
-![](./images/codeReuse2.png)
+```javascript
+function createWorld(name = 'Cronenberg World') {
+    const species = new Set()
+
+    function getExistingSpecies () { return Array.from(species) }
+
+    function createBeing({name, type = 'being'}= {}) {
+        species.add(type)
+        return { name, reproduce }
+        function reproduce(name) { return {__proto__: this, name} }
+    }
+    // NOTE - optimization/profiling
+    function Walker(name, type, legs, stepsPerSec) {
+        this._intvl = null
+        this._steps = 0
+        this.name = name
+        this.type = type
+        this._legs = legs
+        this._stepsPerSec = stepsPerSec
+    }
+    Walker.prototype = createBeing({type: 'walker'})
+    Walker, prototype.walk = function() {
+        this._intv = this._intv || setInterval(() => this._steps += this._legs, this.stepsPerSec)
+        return this.type + ' is walking'
+    }
+    Walker.prototype.stop = function () {
+        clearInterval(this._intv)
+        this._intv = null
+        return this.type + ' walked ' + this._steps + ' steps'
+    }
+    function createWalker({name, type = 'walker', legs = 4, speed = 10} = {}) {
+        return new Walker(name, type, legs, 1000 / speed)
+    }
+    function createBiped({name, type = 'biped', step = 2, speed = 5} = {}) {
+        return createWalker({name, type, step, speed})
+    }
+    return { name, createBeing, createWalker, createBiped, getExistingSpecies }
+}
+```
 
 ---
 
@@ -450,7 +611,7 @@ const usage  = '
 
     Welcome to ${NAME} version ${VERSION}
 
-    -----------------------------------------
+    ----------------------------------------- 
 ```
 - template strings are awesome
     - multiline
